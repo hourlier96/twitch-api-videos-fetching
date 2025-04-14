@@ -1,21 +1,16 @@
-# Visibrain Interview
+# Twitch API Videos Fetching
 
 Web application to search Twitch videos from video game name.
 
+Search a game name, and get a list of twitch video about it !
+
 ## Stack
 
-VueJS for requesting Twitch videos from search bar
-FastAPI interacting with Twitch API for getting videos
-MongoDB used for caching Twitch results
+- VueJS & Vuetify for requesting Twitch videos from search bar
+- FastAPI interacting with Twitch API for getting videos
+- MongoDB used for caching Twitch results
 
-### Frontend
+## Setup
 
-FastAPI
-
-See frontend/README.md
-
-### Backend
-
-FastAPI
-
-See backend/README.md
+- [Frontend](https://github.com/hourlier96/twitch-api-videos-fetching/tree/main/frontend)
+- [Backend](https://github.com/hourlier96/twitch-api-videos-fetching/tree/main/backend)
