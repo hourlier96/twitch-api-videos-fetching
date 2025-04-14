@@ -1,5 +1,11 @@
+import os
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import ConnectionFailure, DuplicateKeyError
+
+# We define the TTL for the cache
+# 3m, because polling is done every 2m
+# this is a good compromise between performance and freshness
+TTL_SECONDS = 180
 
 
 class MongoDB:
@@ -39,6 +45,24 @@ class MongoDB:
             pass
         except Exception as e:
             raise e
+
+
+async def setup_mongodb_indexes():
+    from main import app
+
+    # Create unique & ttl indexes
+    await app.state.mongo.db[os.getenv("CATEGORIES_COLLECTION")].create_index(
+        ["id"], unique=True
+    )
+    await app.state.mongo.db[os.getenv("CATEGORIES_COLLECTION")].create_index(
+        "cached_at", expireAfterSeconds=TTL_SECONDS
+    )
+    await app.state.mongo.db[os.getenv("VIDEOS_COLLECTION")].create_index(
+        ["id"], unique=True
+    )
+    await app.state.mongo.db[os.getenv("VIDEOS_COLLECTION")].create_index(
+        "cached_at", expireAfterSeconds=TTL_SECONDS
+    )
 
 
 async def get_mongo_instance() -> MongoDB:

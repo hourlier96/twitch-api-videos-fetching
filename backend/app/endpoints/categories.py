@@ -76,9 +76,10 @@ async def get_categories(
     # Insert matching categories into the database
     cached_at = datetime.now(timezone.utc)
     for c in matching_categories:
-        c["cached_at"] = cached_at
-        await db.insert(
-            os.getenv("CATEGORIES_COLLECTION"),
-            c,
-        )
+        c["cached_at"] = cached_at  # Ensure ttl deletion happens
+
+    await db.insert(
+        os.getenv("CATEGORIES_COLLECTION"),
+        matching_categories,
+    )
     return response.json()

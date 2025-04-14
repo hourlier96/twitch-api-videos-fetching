@@ -24,8 +24,8 @@ async def get_videos(
     if not CURRENT_TOKEN:
         CURRENT_TOKEN = await get_token()
 
-    # Check if the videos are already in the database
-    # based on the category_id
+    # Check if the videos are already
+    # in the database based on the game_id
     cursor = await db.find(
         os.getenv("VIDEOS_COLLECTION"), {"game_id": game_id}, multiple=True
     )
@@ -34,6 +34,7 @@ async def get_videos(
         print("Found videos from cache")
         return {"data": cached_videos, "pagination": None}
 
+    # If not, fetch the videos from Twitch API
     response = await http_client.get(
         url=f"{os.getenv('TWITCH_API_URL')}/videos?game_id={game_id}&language=fr",
         headers={
@@ -47,7 +48,6 @@ async def get_videos(
             detail="Error fetching Twitch videos",
         )
 
-    # Filter videos based on the game_id
     matching_videos = [video for video in response.json()["data"]]
     if not matching_videos:
         raise HTTPException(
@@ -56,7 +56,7 @@ async def get_videos(
         )
     cached_at = datetime.now(timezone.utc)
     for video in matching_videos:
-        video["cached_at"] = cached_at
+        video["cached_at"] = cached_at  # Ensure ttl deletion happens
         video["game_id"] = game_id
 
     # Insert the videos into the database

@@ -9,14 +9,10 @@ from pymongo.errors import ConnectionFailure
 
 from app.endpoints.categories import router as categories_router
 from app.endpoints.videos import router as videos_router
-from db import MongoDB
+from db import MongoDB, setup_mongodb_indexes
 
 load_dotenv()
 
-# We define the TTL for the cache
-# 3m, because polling is done every 2m
-# this is a good compromise between performance and freshness
-TTL_SECONDS = 180
 
 app = FastAPI()
 app.include_router(categories_router)
@@ -39,20 +35,7 @@ async def lifespan(app: FastAPI):
     try:
         mongo = MongoDB("mongodb://localhost:27017/", "twitch_records")
         app.state.mongo = mongo
-        # Create unique & ttl indexes
-        # This deletes all documents older than 10 seconds for tests
-        await app.state.mongo.db[os.getenv("CATEGORIES_COLLECTION")].create_index(
-            ["id"], unique=True
-        )
-        await app.state.mongo.db[os.getenv("CATEGORIES_COLLECTION")].create_index(
-            "cached_at", expireAfterSeconds=TTL_SECONDS
-        )
-        await app.state.mongo.db[os.getenv("VIDEOS_COLLECTION")].create_index(
-            ["id"], unique=True
-        )
-        await app.state.mongo.db[os.getenv("VIDEOS_COLLECTION")].create_index(
-            "cached_at", expireAfterSeconds=TTL_SECONDS
-        )
+        await setup_mongodb_indexes()
         print(
             "Application startup: Successfully connected to MongoDB database 'twitch_records'!"
         )
