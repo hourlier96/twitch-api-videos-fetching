@@ -13,6 +13,10 @@ from db import MongoDB
 
 load_dotenv()
 
+# We define the TTL for the cache
+# 3m, because polling is done every 2m
+# this is a good compromise between performance and freshness
+TTL_SECONDS = 180
 
 app = FastAPI()
 app.include_router(categories_router)
@@ -41,13 +45,13 @@ async def lifespan(app: FastAPI):
             ["id"], unique=True
         )
         await app.state.mongo.db[os.getenv("CATEGORIES_COLLECTION")].create_index(
-            "cached_at", expireAfterSeconds=20
+            "cached_at", expireAfterSeconds=TTL_SECONDS
         )
         await app.state.mongo.db[os.getenv("VIDEOS_COLLECTION")].create_index(
             ["id"], unique=True
         )
         await app.state.mongo.db[os.getenv("VIDEOS_COLLECTION")].create_index(
-            "cached_at", expireAfterSeconds=20
+            "cached_at", expireAfterSeconds=TTL_SECONDS
         )
         print(
             "Application startup: Successfully connected to MongoDB database 'twitch_records'!"
