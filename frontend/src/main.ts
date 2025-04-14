@@ -9,10 +9,16 @@ import router from "./router";
 const app = createApp(App);
 
 // Vuetify
+import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import type { ThemeDefinition } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+
+
+// Icons
+import '@mdi/font/css/materialdesignicons.css'
+import { mdi } from 'vuetify/iconsets/mdi'
 
 const customDarkTheme: ThemeDefinition = {
     dark: true,
@@ -38,7 +44,12 @@ const vuetify = createVuetify({
       themes: {
         customDarkTheme
       }
-    }
+    },
+    icons: {
+      sets: {
+        mdi
+      }
+    },
   })
   
 

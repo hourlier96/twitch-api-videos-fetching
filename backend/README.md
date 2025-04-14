@@ -21,6 +21,16 @@ uv pip install -r requirements.txt
 
 3. Create .env based on .env_template (you need a registered application in Twitch dev console)
 
+4. Install a MongoDB server. The API is configured to read on default port (mongodb://localhost:27017/)
+
+```bash
+# For MACOS
+# https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-os-x/
+
+# For Linux
+# https://www.mongodb.com/docs/manual/administration/install-on-linux/
+```
+
 ## Run
 
 ```bash
