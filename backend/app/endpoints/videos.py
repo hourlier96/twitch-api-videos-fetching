@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import os
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -53,8 +54,9 @@ async def get_videos(
             status_code=404,
             detail="No videos found for the specified category",
         )
-    # Add the current timestamp to each video
+    cached_at = datetime.now(timezone.utc)
     for video in matching_videos:
+        video["cached_at"] = cached_at
         video["game_id"] = game_id
 
     # Insert the videos into the database
