@@ -1,0 +1,34 @@
+{
+    "folders": [
+	{
+	    "name": "root",
+            "path": "../"
+        },
+        {
+            "name": "frontend",
+            "path": "../frontend"
+        },
+        {
+            "name": "backend",
+            "path": "../backend"
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "node_modules/": true,
+            ".nuxt/": true,
+            ".venv/": true,
+            ".mypy_cache/": true,
+            ".pytest_cache/": true,
+            ".pgdata/": true,
+            "frontend/": true,
+            "backend/": true
+        },
+        "prettier.tabWidth": 4,
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "[vue]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode"
+        }
+    }
+}
