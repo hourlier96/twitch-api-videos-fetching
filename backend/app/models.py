@@ -1,4 +1,5 @@
 from typing import List
+from bson import ObjectId
 from pydantic import BaseModel
 
 
@@ -10,7 +11,7 @@ class TwitchToken(BaseModel):
 
 class TwitchVideo(BaseModel):
     id: str
-    stream_id: str
+    stream_id: str | None
     user_id: str
     user_login: str
     user_name: str
@@ -29,5 +30,17 @@ class TwitchVideo(BaseModel):
 
 
 class TwitchVideoResponse(BaseModel):
+    # Twitch API fields
     data: List[TwitchVideo]
-    pagination: dict
+    pagination: dict | None
+
+
+class TwitchCategory(BaseModel):
+    # Twitch API fields
+    id: str
+    name: str
+    box_art_url: str
+
+
+class TwitchCategoryResponse(BaseModel):
+    data: List[TwitchCategory] | None
