@@ -5,7 +5,7 @@ from pymongo.errors import ConnectionFailure, DuplicateKeyError
 # We define the TTL for the cache
 # 3m, because polling is done every 2m
 # this is a good compromise between performance and freshness
-TTL_SECONDS = 180
+TTL_SECONDS = 60
 
 
 class MongoDB:

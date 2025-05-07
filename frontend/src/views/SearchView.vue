@@ -43,10 +43,10 @@
             </v-list-item>
         </template>
     </v-autocomplete>
-    <div v-if="videoResult?.data?.length">
+    <div v-if="videoResult?.length">
         <v-list>
             <v-list-item
-                v-for="video in videoResult.data"
+                v-for="video in videoResult"
                 :key="video.id"
                 :href="`https://www.twitch.tv/videos/${video.id}`"
                 target="_blank"
@@ -62,19 +62,14 @@
 </template>
 
 <script setup lang="ts">
-import { onUnmounted, ref } from "vue";
+import { ref } from "vue";
 import { useDebounceFn } from "@vueuse/core";
-import { getCategories, getVideos } from "@/api/twitch.ts";
-
-const POLLING_INTERVAL = 120000;
+import { getCategories } from "@/api/twitch.ts";
 
 const currentGameID = ref("");
 const categoryResult = ref();
 const videoResult = ref();
 const loading = ref(false);
-
-const isPolling = ref(false);
-let pollingTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
 async function searchCategories(query: string) {
     loading.value = true;
@@ -99,7 +94,7 @@ async function searchVideos(game_id) {
     currentGameID.value = game_id;
     loading.value = true;
     try {
-        startPollingVideos(game_id);
+        listenNewVideos(game_id);
     } catch (error) {
         console.error("Error fetching videos:", error);
         videoResult.value = { data: [] };
@@ -108,52 +103,28 @@ async function searchVideos(game_id) {
     }
 }
 
-async function pollVideos(game_id: string | number) {
-    try {
-        loading.value = true;
-        const response = await getVideos({ game_id });
-        if (response.status === 200) {
-            videoResult.value = response.data;
-        } else {
-            console.warn(`Polling failed: Received status ${response.status}`);
-        }
-        loading.value = false;
-    } catch (error) {
-        console.error("Error fetching videos:", error);
-        loading.value = false;
-        videoResult.value = { data: [] };
-        if (isPolling.value) {
-            stopPolling();
-        }
-    } finally {
-        if (isPolling.value) {
-            clearTimeout(pollingTimeoutId!);
-            pollingTimeoutId = setTimeout(
-                () => pollVideos(game_id),
-                POLLING_INTERVAL
-            );
-        }
-    }
-}
+function listenNewVideos(game_id) {
+    const eventSource = new EventSource(
+        `http://127.0.0.1:8000/videos?game_id=${game_id}`
+    );
 
-async function startPollingVideos(game_id: string | number) {
-    isPolling.value = true;
-    console.log("Polling started");
-    await pollVideos(game_id);
-}
+    eventSource.onopen = () => {
+        console.log("EventSource connected");
+        //Everytime the connection gets extablished clearing the previous data from UI
+    };
 
-function stopPolling() {
-    if (pollingTimeoutId) {
-        clearTimeout(pollingTimeoutId);
-        pollingTimeoutId = null;
-    }
-    if (isPolling.value) {
-        isPolling.value = false;
-        console.log("Polling stopped");
-    }
-}
+    //eventSource can have event listeners based on the type of event.
+    //Bydefault for message type of event it have the onmessage method which can be used directly or this same can be achieved through explicit eventlisteners
+    eventSource.addEventListener("newVideos", function (event) {
+        const content = JSON.parse(event.data);
+        console.log(content);
+        videoResult.value = content;
+    });
 
-onUnmounted(() => {
-    stopPolling();
-});
+    //In case of any error, if eventSource is not closed explicitely then client will retry the connection a new call to backend will happen and the cycle will go on.
+    eventSource.onerror = (error) => {
+        console.error("EventSource failed", error);
+        eventSource.close();
+    };
+}
 </script>
